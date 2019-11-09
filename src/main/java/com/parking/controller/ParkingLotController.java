@@ -4,10 +4,10 @@ import com.parking.beans.ParkingDetails;
 import com.parking.beans.ParkingSpace;
 import com.parking.beans.Vehicle;
 import com.parking.beans.VehicleType;
-import com.parking.exception.NoEmptySpaceAvailable;
+import com.parking.exception.InvalidParkingNumberException;
+import com.parking.exception.NoEmptySpaceAvailableException;
 import com.parking.repository.ParkingLotRepository;
 import com.parking.repository.ParkingSpaceRepository;
-import com.sun.jdi.request.InvalidRequestStateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +32,7 @@ public class ParkingLotController {
     }
 
     @PostMapping("/parking/{vehicle}")
-    public Vehicle addParkingDetails(@Valid @RequestBody Vehicle vehicle) throws NoEmptySpaceAvailable {
+    public Vehicle addParkingDetails(@Valid @RequestBody Vehicle vehicle) throws NoEmptySpaceAvailableException {
         ParkingDetails parkingDetails = new ParkingDetails();
         parkingDetails.setInTime(new Timestamp(new Date().getTime()));
         parkingDetails.setVehicle(vehicle);
@@ -47,19 +47,19 @@ public class ParkingLotController {
         parkingSpaceRepository.occupyParkingSpace(parkingNumber, floor);
     }
 
-    private ParkingSpace getVacantParkingSpace(VehicleType vehicleType) throws NoEmptySpaceAvailable {
+    private ParkingSpace getVacantParkingSpace(VehicleType vehicleType) throws NoEmptySpaceAvailableException {
         Optional<ParkingSpace> parkingSpaceOptional = Optional.of(parkingLotRepository.findVacantParkingSpace(vehicleType));
         if (parkingSpaceOptional.isPresent()) {
            return parkingSpaceOptional.get();
         } else {
-            throw new NoEmptySpaceAvailable("ParkingSpace is full for " + vehicleType);
+            throw new NoEmptySpaceAvailableException("ParkingSpace is full for " + vehicleType);
         }
     }
 
     @GetMapping("/parking/{parkingSpaceNo}")
-    public Vehicle getVehicle(@PathVariable(value = "parkingSpaceNo") Long parkingSpaceNo) {
+    public Vehicle getVehicle(@PathVariable(value = "parkingSpaceNo") Long parkingSpaceNo) throws InvalidParkingNumberException {
         return parkingLotRepository.findById(parkingSpaceNo)
-                .orElseThrow(() -> new InvalidRequestStateException("Parking Space Number is invalid"));
+                .orElseThrow(() -> new InvalidParkingNumberException("Parking Space Number is invalid"));
     }
 
 }

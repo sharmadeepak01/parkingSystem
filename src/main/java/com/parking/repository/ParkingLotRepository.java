@@ -4,7 +4,6 @@ import com.parking.beans.ParkingDetails;
 import com.parking.beans.ParkingSpace;
 import com.parking.beans.Vehicle;
 import com.parking.beans.VehicleType;
-import com.parking.exception.NoEmptySpaceAvailable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -13,10 +12,6 @@ import java.sql.Timestamp;
 
 @Repository
 public interface ParkingLotRepository extends JpaRepository<Vehicle, Long> {
-    public ParkingSpace add(Vehicle vehicle) throws NoEmptySpaceAvailable;
-    public Vehicle getVehicle();
-    public void removeVehicle();
-
     @Query(value="select CURRENT_TIMESTAMP() - inTime from ParkingDetails where ticketId = :ticketId",
             nativeQuery = true)
     public Timestamp timeTakenByVehicle(long ticketId);
